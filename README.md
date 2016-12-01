@@ -30,13 +30,13 @@ The most basic implementation could be:
     }
 
     debug.sendLog() to send asynchoronously
-    debug.sendLogSynchronously() to send synchoronously
+    debug.sendLogOnExit() to send synchoronously
  
 I have it setup so whenever applicationWillResignActive is called, it uploads the log, then when applicationDidBecomeActive is called I create a new debugging session again. I do this like so:
  
     func applicationWillResignActive(_ application: UIApplication) {
         debug.log(tag: "AppDelegate", content: "applicationWillResignActive - app went from active to inactive")
-        debug.sendLogSynchronously()
+        debug.sendLogOnExit()
     }
      
     func applicationDidBecomeActive(_ application: UIApplication) {
