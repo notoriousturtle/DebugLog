@@ -1,4 +1,4 @@
-# DeubgLog
+# DebugLog
 A simple Swift debug logging solution, with file upload designed for iOS, and WatchOS written in Swift 3.
 
   - Logs to a text file, "debug.log" in the app's Documents directory
