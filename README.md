@@ -15,10 +15,11 @@ A simple Swift debug logging solution, with file upload designed for iOS, and Wa
   - It doesn't prompt for auth, even when it needs to. The log will be removed.
     This is done to prevent any negative effects on the user experience
 
-# SAMPLE IMPLEMENTATION:
+### Sample Implementation:
 
 The below code will enable debugging, setup a new session, remove the log, log something, then upload it, and clear it again
 The most basic implementation could be:
+
     override func viewDidLoad() {
         var debug = DebugLog() //enable debugging
         debug.enableLogging()
@@ -51,6 +52,7 @@ I have it setup so whenever applicationWillResignActive is called, it uploads th
     }
  
 The log is sent in a POST request like so:
+
     POST /api/error-logs/add HTTP/1.1
     Host: domain
     Accept: application/json
@@ -61,7 +63,8 @@ The log is sent in a POST request like so:
 
     { "DebugLog": [ "2016-10-05 16:55:07.920 | main | bbbbbbbb", "2016-10-05 16:55:07.920 | main | bbbbbbbb" ] }
  
-    On response, server should return JSON response like so:
+On response, server should return JSON response like so:
+
     { "success": true }
 
 Created by notorious_turtle on 5/10/16.
