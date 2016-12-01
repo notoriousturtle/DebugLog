@@ -11,12 +11,14 @@ A simple Swift debug logging solution, with file upload designed for iOS, and Wa
     `2016-10-05 16:55:07.920 | main | bbbbbbbb`
     
   If you want to suppress the message to console do:
+
     `debug.log(tag: "main", content: "bbbbbbbb", echo: false)`
   
 - If you want to print to console only, and not the log (generally for formatting purposes), use:
+
     `debug.pp(tag: "main", content: "bbbbbbbb")`
 
-- Checks if file size is greater than 500KB, if so, it uploads it, then wipes it
+- Checks if file size is greater than `500KB`, if so, it uploads it, then wipes it
 - It doesn't prompt for auth, even when it needs to. The log will be removed.
   This is done to prevent any negative effects on the user experience
 
