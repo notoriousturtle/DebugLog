@@ -1,5 +1,5 @@
 # DebugLog
-A simple Swift debug logging solution, with file upload designed for iOS, and WatchOS written in Swift 3. Each `debug.log` call is appended to the end of a file (without reading the entire file each time), once the file reaches 500KB, it is uploaded to a server.
+A simple Swift debug logging solution, with file upload designed for iOS, and WatchOS written in Swift 3. Each `debug.log()` call appends the parameters to the end of a file (without reading the entire file each time), once the file reaches 500KB, it is uploaded to a server.
 
 - Logs to a text file, "debug.log" in the app's Documents directory
 - Log an entry with a tag prefix, e.g.
