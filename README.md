@@ -3,8 +3,11 @@ A simple Swift debug logging solution, with file upload designed for iOS, and Wa
 
 - Logs to a text file, "debug.log" in the app's Documents directory
 - Log an entry with a tag prefix, e.g.
+
     `DebugLog.log(tag: "main", content: "bbbbbbbb")`
-    Outputs (to log and console):
+
+  Outputs (to log and console):
+
     `2016-10-05 16:55:07.920 | main | bbbbbbbb`
     
   If you want to suppress the message to console do:
