@@ -50,8 +50,10 @@ I have it setup so whenever applicationWillResignActive is called, it uploads th
         //for the log file, dont print to console
         debug.log(tag: "AppDelegate", content: "applicationDidBecomeActive - app became active", echo: false)
     }
- 
-The log is sent in a POST request like so:
+
+The server side code is your responsibility. In my case, I used CakePHP to log the request. You do not need to use CakePHP, you could use a simple PHP script. This is the format of the request, and response:
+
+The log is sent in a POST request like so (with the parameter "DebugLog", with the value of a JSON array):
 
     POST /api/error-logs/add HTTP/1.1
     Host: domain
