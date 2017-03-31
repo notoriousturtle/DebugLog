@@ -1,8 +1,5 @@
 //
-//  DebugLog.swift
-//  By notorious_turtle
-//
-//  A simple debug logging solution designed for iOS, and WatchOS written in Swift 3.
+//  DebugLog.swift - A simple debug logging solution
 //
 //  - Logs to a text file, "debug.log" in the app's Documents directory
 //  - Log an entry with a tag prefix, e.g.
@@ -15,42 +12,47 @@
 //      debug.pp(tag: "main", content: "bbbbbbbb")
 //
 //  - Checks if file size is greater than 500KB, if so, it uploads it, then wipes it
-//  - It doesn't prompt for auth, even when it needs to. The log will be removed.
-//    This is done to prevent any negative effects on the user experience
+//  - It doesn't prompt for auth, even when it needs it. It will just remove the log
+//    This is done to prevent any negative effects on the app's user experience
+//  - When logging is disabled, it still prints to console, just not to file.
 //
 //  SAMPLE IMPLEMENTATION:
 /*
     The below code will enable debugging, setup a new session, remove the log, log something, then upload it, and clear it again
     The most basic implementation could be:
     override func viewDidLoad() {
-        var debug = DebugLog() //enable debugging
+        var debug = DebugLog.sharedManager
         debug.enableLogging()
  
-        debug = DebugLog(setup: true) //setup new session
         debug.log(tag: "ViewController", content: "viewDidLoad called")
-        debug.sendLog()
+        debug.sendLog() //after all your logging is done, upload it
     }
 
     debug.sendLog() to send asynchoronously
     debug.sendLogSynchronously() to send synchoronously
  
-    I have it setup so whenever applicationWillResignActive is called, it uploads the log, then when applicationDidBecomeActive
+    I send the debug log whenever applicationWillResignActive is called, it uploads the log, then when applicationDidBecomeActive
     is called I create a new debugging session again. I do this like so:
  
     func applicationWillResignActive(_ application: UIApplication) {
-        debug.log(tag: "AppDelegate", content: "applicationWillResignActive - app went from active to inactive")
-        debug.sendLogSynchronously()
+         debug.log(tag: "AppDelegate", content: "applicationWillResignActive - app went from active to inactive")
+         debug.sendLogOnExit()
     }
-     
+ 
     func applicationDidBecomeActive(_ application: UIApplication) {
         debug.log(tag: "AppDelegate", content: "applicationDidBecomeActive - app became active")
  
-        debug.enableLogging() //enable logging
-        debug.empty() //remove old log (if any)
- 
-        debug = DebugLog(setup: true)
- 
-        //for the log file, dont print to console
+        //enable debugging
+        let debuggingEnabledState = UserDefaults.standard.bool(forKey: "debuggingEnabled")
+         
+        if debuggingEnabledState {
+            debug.enableLogging() //enable logging
+        }
+         
+        //adds new log instance markers to log
+        debug.newMarkers()
+         
+        //for the log file
         debug.log(tag: "AppDelegate", content: "applicationDidBecomeActive - app became active", echo: false)
     }
  
@@ -65,12 +67,13 @@
 
     { "DebugLog": [ "2016-10-05 16:55:07.920 | main | bbbbbbbb", "2016-10-05 16:55:07.920 | main | bbbbbbbb" ] }
  
-    On response, server should return JSON response like so:
+    On response, server should return a JSON response like so:
     { "success": true }
     */
 //
 //  Created by notorious_turtle on 5/10/16.
 //  Copyright © 2016 notorious_turtle. All rights reserved.
+//
 
 import UIKit
 
@@ -79,25 +82,27 @@ class DebugLog: NSObject, URLSessionDelegate {
     let fileSizeLimit: Double = 500
     
     //define your server here, e.g. server = "https://example.com"
-    //in my case, mine is defined via a Singleton variable
     let server = GlobalVariables.sharedManager.server
+    
+    static let sharedManager = DebugLog()
     
     var loggingEnabled = false
     var uploadingLog = false
     var fallbackBuffer = [String]()
     var fallbackBufferCounter = 0
     
-    init(setup: Bool? = false) {
+    private override init() {
         super.init()
         
+        newMarkers()
+    }
+    
+    //add new instance markers to log
+    func newMarkers() {
         loggingEnabled = isLoggingEnabled() //always check status
         
-        if let initialise = setup {
-            if initialise {
-                self.log(tag: "DebugLog", content: "New debugging instance created")
-                self.pp(tag: "DebugLog", content: "Logging enabled: *** \(loggingEnabled) ***")
-            }
-        }
+        self.log(tag: "DebugLog", content: "New debugging instance created")
+        self.pp(tag: "DebugLog", content: "Logging enabled: *** \(loggingEnabled) ***")
     }
     
     //enable logging
@@ -278,6 +283,9 @@ class DebugLog: NSObject, URLSessionDelegate {
         do {
             jsonData = try JSONSerialization.data(withJSONObject: body, options: [])
             urlRequest.httpBody = jsonData
+            
+            //print json string
+            //print(NSString(data: jsonData, encoding: String.Encoding.utf8.rawValue)!)
         }
         catch {
             self.pp(tag: "DebugLog", content: "Error, cannot create JSON debug log")
@@ -300,6 +308,8 @@ class DebugLog: NSObject, URLSessionDelegate {
                 self.pp(tag: "DebugLog", content: "Error, did not recieve any data")
                 return
             }
+            
+            //print(NSString(data: data!, encoding: String.Encoding.utf8.rawValue)!)
             
             let responseCode = response as! HTTPURLResponse
             if responseCode.statusCode == 200 {
