@@ -21,15 +21,16 @@
     The below code will enable debugging, setup a new session, remove the log, log something, then upload it, and clear it again
     The most basic implementation could be:
     override func viewDidLoad() {
-        var debug = DebugLog.sharedManager
+        let debug = DebugLog.sharedManager
         debug.enableLogging()
  
         debug.log(tag: "ViewController", content: "viewDidLoad called")
         debug.sendLog() //after all your logging is done, upload it
     }
-
+ 
+    You can send the log in two ways:
     debug.sendLog() to send asynchoronously
-    debug.sendLogSynchronously() to send synchoronously
+    debug.sendLogOnExit() uses background services to send the log file
  
     I send the debug log whenever applicationWillResignActive is called, it uploads the log, then when applicationDidBecomeActive
     is called I create a new debugging session again. I do this like so:
@@ -69,7 +70,7 @@
  
     On response, server should return a JSON response like so:
     { "success": true }
-    */
+*/
 //
 //  Created by notorious_turtle on 5/10/16.
 //  Copyright © 2016 notorious_turtle. All rights reserved.
