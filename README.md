@@ -28,33 +28,40 @@ The below code will enable debugging, setup a new session, remove the log, log s
 The most basic implementation could be:
 
     override func viewDidLoad() {
-        var debug = DebugLog() //enable debugging
+        let debug = DebugLog.sharedManager
         debug.enableLogging()
  
-        debug = DebugLog(setup: true) //setup new session
         debug.log(tag: "ViewController", content: "viewDidLoad called")
-        debug.sendLog()
+        debug.sendLog() //after all your logging is done, upload it
     }
 
+You can send the log in two ways: 
+
     debug.sendLog() to send asynchoronously
-    debug.sendLogOnExit() to send synchoronously
+    debug.sendLogOnExit() uses background services to send the log file
  
-I have it setup so whenever applicationWillResignActive is called, it uploads the log, then when applicationDidBecomeActive is called I create a new debugging session again. I do this like so:
+I send the debug log whenever applicationWillResignActive is called, it uploads the log, then when applicationDidBecomeActive
+is called I create a new debugging session again. I do this like so:
  
     func applicationWillResignActive(_ application: UIApplication) {
-        debug.log(tag: "AppDelegate", content: "applicationWillResignActive - app went from active to inactive")
-        debug.sendLogOnExit()
+         debug.log(tag: "AppDelegate", content: "applicationWillResignActive - app went from active to inactive")
+         debug.sendLogOnExit()
     }
-     
+ 
     func applicationDidBecomeActive(_ application: UIApplication) {
         debug.log(tag: "AppDelegate", content: "applicationDidBecomeActive - app became active")
  
-        debug.enableLogging() //enable logging
-        debug.empty() //remove old log (if any)
- 
-        debug = DebugLog(setup: true)
- 
-        //for the log file, dont print to console
+        //enable debugging
+        let debuggingEnabledState = UserDefaults.standard.bool(forKey: "debuggingEnabled")
+         
+        if debuggingEnabledState {
+            debug.enableLogging() //enable logging
+        }
+         
+        //adds new log instance markers to log
+        debug.newMarkers()
+         
+        //for the log file
         debug.log(tag: "AppDelegate", content: "applicationDidBecomeActive - app became active", echo: false)
     }
 
